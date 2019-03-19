@@ -1,0 +1,24 @@
+{
+  "name": "ubio-sdk-example",
+  "version": "0.0.0",
+  "description": "JavaScript SDK example for integrating with ubio.",
+  "main": "index.js",
+  "scripts": {
+    "install": "pika-web"
+  },
+  "author": "",
+  "repository": "github:universalbasket/javascript-sdk",
+  "license": "ISC",
+  "dependencies": {
+    "@ubio/sdk": "file:..",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "@pika/web": "^0.4.2",
+    "node-fetch": "^2.3.0"
+  },
+  "@pika/web": {
+    "webDependencies": [
+      "@ubio/sdk"
+    ]
+  }
+}
