@@ -1,0 +1,16 @@
+{
+    "extends": "ub",
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 5
+    },
+    "env": {
+        "browser": true,
+        "node": true
+    },
+    "rules": {
+        "prefer-arrow-callback": "off",
+        "object-shorthand": "off",
+        "no-var": "off"
+    }
+}
