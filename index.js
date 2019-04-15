@@ -151,6 +151,9 @@ function makeApiClient(baseUrl, fetch, token) {
         getJobEndUser: function(jobId) {
             return apiFetch('jobs/' + jobId + '/end-user');
         },
+        getJobEvents: function(jobId, offset) {
+            return apiFetch('jobs/' + jobId + '/events?offset=' + (offset || 0));
+        },
         trackJob: function(jobId, callback) {
             return poll(jobId, callback, 1000); // TODO: EventSource or WebSocket.
         }
@@ -163,30 +166,32 @@ function makeApiClient(baseUrl, fetch, token) {
     }
 
     function poll(jobId, callback, dt) {
-        var job;
+        var offset = 0;
 
         function run() {
             return delay(dt)
                 .then(function() {
-                    return api.getJob(jobId);
+                    return api.getJobEvents(jobId, offset);
                 })
-                .then(function(updated) {
-                    if (!job || updated.state !== job.state) {
-                        callback(updated, job);
+                .then(function(body) {
+                    var events = body.list.slice();
+
+                    offset += events.length;
+
+                    events.sort(function(a, b) {
+                        return b.createdAt - a.createdAt;
+                    });
+
+                    function runCallback() {
+                        if (events.length) {
+                            return callback(events.pop())
+                                .then(runCallback);
+                        }
                     }
 
-                    job = updated;
-
-                    if (job.state === 'success') {
-                        return;
-                    }
-
-                    if (job.state === 'fail') {
-                        throw new Error('Job failed.');
-                    }
-
-                    return run();
-                });
+                    return runCallback();
+                })
+                .then(run);
         }
 
         return run();
