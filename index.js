@@ -1,6 +1,7 @@
 var defaultApiUrl = 'https://api.automationcloud.net';
 var defaultVaultUrl = 'https://vault.automationcloud.net';
 var defaultFetch = typeof self !== 'undefined' && self.fetch && self.fetch.bind(self);
+var useSse = false;
 var base64Encode;
 
 if (typeof btoa === 'function') {
@@ -107,6 +108,11 @@ function makeApiClient(baseUrl, fetch, token) {
         getService: function(serviceId) {
             return apiFetch('services/' + serviceId);
         },
+        getPreviousJobOutputs: function(serviceId, inputs) {
+            const body = { inputs: inputs || [] };
+
+            return apiFetch('services/' + serviceId + '/previous-job-outputs', { method: 'POST', body: body });
+        },
         getJobs: function(query) {
             return apiFetch('jobs', { query: query });
         },
@@ -152,10 +158,14 @@ function makeApiClient(baseUrl, fetch, token) {
             return apiFetch('jobs/' + jobId + '/end-user');
         },
         getJobEvents: function(jobId, offset) {
-            return apiFetch('jobs/' + jobId + '/events?offset=' + (offset || 0));
+            return apiFetch('jobs/' + jobId + '/events', { query: { offset: offset || 0 } });
         },
         trackJob: function(jobId, callback) {
-            return poll(jobId, callback, 1000); // TODO: EventSource or WebSocket.
+            if (useSse && typeof EventSource !== 'undefined') {
+                return track(jobId, callback);
+            }
+
+            return poll(jobId, callback, 1000);
         }
     };
 
@@ -165,36 +175,82 @@ function makeApiClient(baseUrl, fetch, token) {
         });
     }
 
+    function track(jobId, callback) {
+        var sse = new EventSource('jobs/' + jobId + '/events?token=' + token);
+        var closed = false;
+
+        function close() {
+            closed = true;
+            sse.close();
+        }
+
+        sse.onmessage(function(event) {
+            if (closed) {
+                return;
+            }
+
+            var jobEvent;
+
+            try {
+                jobEvent = JSON.parse(event.data);
+            } catch (e) {
+                return;
+            }
+
+            if (jobEvent.object !== 'job-event') {
+                return;
+            }
+
+            if (jobEvent.name === 'success' || jobEvent.name === 'fail') {
+                close();
+            }
+
+            callback(event);
+        });
+
+        return close;
+    }
+
     function poll(jobId, callback, dt) {
         var offset = 0;
+        var stopped = false;
 
         function run() {
             return delay(dt)
                 .then(function() {
-                    return api.getJobEvents(jobId, offset);
+                    if (!stopped) {
+                        return api.getJobEvents(jobId, offset);
+                    }
                 })
                 .then(function(body) {
+                    if (stopped) {
+                        return;
+                    }
+
                     var events = body.list.slice();
 
                     offset += events.length;
 
                     events.sort(function(a, b) {
-                        return b.createdAt - a.createdAt;
+                        return a.createdAt - b.createdAt;
                     });
 
-                    function runCallback() {
-                        if (events.length) {
-                            return callback(events.pop())
-                                .then(runCallback);
-                        }
-                    }
-
-                    return runCallback();
+                    events.forEach(function(event) {
+                        callback(event);
+                    });
                 })
-                .then(run);
+                .then(function() {
+                    if (!stopped) {
+                        return run();
+                    }
+                });
         }
 
-        return run();
+        run();
+
+        return function stop() {
+            stopped = true;
+        };
     }
 
     return api;
@@ -288,6 +344,9 @@ export function createEndUserSdk(options) {
     return {
         getService: function() {
             return apiClient.getService(serviceId);
+        },
+        getPreviousJobOuputs: function(inputs) {
+            return apiClient.getPreviousJobOutputs(serviceId, inputs);
         },
         getJob: function() {
             return apiClient.getJob(jobId);
