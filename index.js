@@ -227,7 +227,7 @@ function makeApiClient(baseUrl, fetch, token) {
                         return;
                     }
 
-                    var events = body.list.slice();
+                    var events = body.data.slice();
 
                     offset += events.length;
 
