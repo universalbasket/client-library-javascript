@@ -1,3 +1,4 @@
+// 8056890d25682d507a1315fbac4cc7fe1ae6419ce5ad4f39
 var defaultApiUrl = 'https://api.automationcloud.net';
 var defaultVaultUrl = 'https://vault.automationcloud.net';
 var defaultFetch = typeof self !== 'undefined' && self.fetch && self.fetch.bind(self);
@@ -132,7 +133,7 @@ function makeApiClient(baseUrl, fetch, token) {
             return apiFetch('jobs/' + jobId + '/inputs', { method: 'POST', body: { key, stage, data } });
         },
         getJobOutputs: function(jobId, key, stage) {
-            var path = 'jobs/' + jobId;
+            var path = 'jobs/' + jobId + '/outputs';
 
             if (key) {
                 path += '/' + key;
