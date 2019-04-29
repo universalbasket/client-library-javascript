@@ -17,7 +17,6 @@ if (typeof btoa === 'function') {
     throw new Error('No way to convert to base64.');
 }
 
-// TODO: Does service-api handle array parameters?
 function createSearch(parameters) {
     if (!parameters) {
         return '';
@@ -80,7 +79,9 @@ function fetchWrapper(url, fetch, token, opts) {
                 return response.json()
                     .then(function(body) {
                         // TODO: Better errors from error bodies.
-                        throw new Error(body.message || 'Unexpected response');
+                        const error = new Error(body.message || 'Unexpected response');
+                        error.status = response.status;
+                        throw error;
                     });
             }
 
@@ -177,7 +178,10 @@ function makeApiClient(baseUrl, fetch, token) {
     }
 
     function track(jobId, callback) {
-        var sse = new EventSource('jobs/' + jobId + '/events?token=' + token);
+        var split = baseUrl.split('//');
+        var protocol = split[0];
+        var rest = split.slice(1).join('//');
+        var sse = new EventSource(protocol + '//' + token + ':' + rest + '/jobs/' + jobId + '/events');
         var closed = false;
 
         function close() {
@@ -214,13 +218,42 @@ function makeApiClient(baseUrl, fetch, token) {
 
     function poll(jobId, callback, dt) {
         var offset = 0;
+        var backoff = 0;
         var stopped = false;
 
         function run() {
             return delay(dt)
                 .then(function() {
                     if (!stopped) {
-                        return api.getJobEvents(jobId, offset);
+                        return api.getJobEvents(jobId, offset)
+                            .then(function(body) {
+                                backoff = 0;
+                                return body;
+                            })
+                            .catch(function(error) {
+                                const message = error.stack || error.message;
+
+                                // 4xy errors don't lead to a retry, since the
+                                // client must change something before the
+                                // request can work.
+                                if (error.status < 500) {
+                                    stopped = true;
+                                    console.error('Error communicating with API:', message);
+                                    return;
+                                }
+
+                                // 5xy errors lead to retries with backoff.
+                                backoff += 1;
+
+                                const backoffTime = dt + backoff * dt;
+
+                                console.warn('Error contacting API. Retrying in ' + (backoffTime / 1000).toFixed(1) + ' s. ', message);
+
+                                return delay(backoff * dt)
+                                    .then(function() {
+                                        return { data: [] };
+                                    });
+                            });
                     }
                 })
                 .then(function(body) {
