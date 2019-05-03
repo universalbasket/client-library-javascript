@@ -192,6 +192,11 @@ function makeApiClient(baseUrl, fetch, token) {
         },
         getJobEvents: function(jobId, offset) {
             assertStringArguments({ jobId: jobId });
+
+            if (offset >>> 0 !== offset) {
+                throw new RangeError('offset must be a positive integer.');
+            }
+
             return apiFetch('jobs/' + jobId + '/events', { query: { offset: offset || 0 } });
         },
         trackJob: function(jobId, callback) {
