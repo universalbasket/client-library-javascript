@@ -17,6 +17,14 @@ if (typeof btoa === 'function') {
     throw new Error('No way to convert to base64.');
 }
 
+function assertStringArguments(obj) {
+    Object.keys(obj || {}).forEach(function(key) {
+        if (typeof obj[key] !== 'string') {
+            throw new TypeError('"' + key + '" must be a string.');
+        }
+    });
+}
+
 function createSearch(parameters) {
     if (!parameters) {
         return '';
@@ -102,15 +110,18 @@ function makeApiClient(baseUrl, fetch, token) {
 
     var api = {
         raw: function(path, options) {
+            assertStringArguments({ path: path });
             return apiFetch(path, options);
         },
         getServices: function() {
             return apiFetch('services');
         },
         getService: function(serviceId) {
+            assertStringArguments({ serviceId: serviceId });
             return apiFetch('services/' + serviceId);
         },
         getPreviousJobOutputs: function(serviceId, inputs) {
+            assertStringArguments({ serviceId: serviceId });
             const body = { inputs: inputs || [] };
 
             return apiFetch('services/' + serviceId + '/previous-job-outputs', { method: 'POST', body: body });
@@ -122,47 +133,70 @@ function makeApiClient(baseUrl, fetch, token) {
             return apiFetch('jobs', { method: 'POST', body: fields });
         },
         getJob: function(jobId) {
+            assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId);
         },
         cancelJob: function(jobId) {
+            assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/cancel', { method: 'POST' });
         },
         resetJob: function(jobId) {
+            assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/reset', { method: 'POST' });
         },
         createJobInput: function(jobId, data, key, stage) {
+            assertStringArguments({ jobId: jobId, key: key });
             return apiFetch('jobs/' + jobId + '/inputs', { method: 'POST', body: { key, stage, data } });
         },
-        getJobOutputs: function(jobId, key, stage) {
-            var path = 'jobs/' + jobId + '/outputs';
+        getJobOutputs: function(jobId) {
+            assertStringArguments({ jobId: jobId });
+            return apiFetch('jobs/' + jobId + '/outputs');
+        },
+        getJobOutput: function(jobId, key, stage) {
+            assertStringArguments({ jobId: jobId, key: key });
 
-            if (key) {
-                path += '/' + key;
+            var path = 'jobs/' + jobId + '/outputs/' + key;
 
-                if (stage) {
-                    path += '/' + stage;
-                }
+            if (stage) {
+                path += '/' + stage;
             }
 
             return apiFetch(path);
         },
         getJobScreenshots: function(jobId) {
+            assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/screenshots');
         },
-        getJobScreenshot: function(jobId, id, ext) {
-            return apiFetch('jobs/' + jobId + '/screenshots/' + id + '.' + ext, { parse: false })
-                .then(res => res.blob());
+        getJobScreenshot: function(jobIdOrPath, id, ext) {
+            function toBlob(res) {
+                return res.blob();
+            }
+
+            if (jobIdOrPath && jobIdOrPath[0] === '/') {
+                return apiFetch(jobIdOrPath, { parse: false })
+                    .then(toBlob);
+            }
+
+            assertStringArguments({ jobId: jobIdOrPath, id: id, ext: ext });
+
+            return apiFetch('jobs/' + jobIdOrPath + '/screenshots/' + id + '.png', { parse: false })
+                .then(toBlob);
         },
         getJobMimoLogs: function(jobId) {
+            assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/mimo-logs');
         },
         getJobEndUser: function(jobId) {
+            assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/end-user');
         },
         getJobEvents: function(jobId, offset) {
+            assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/events', { query: { offset: offset || 0 } });
         },
         trackJob: function(jobId, callback) {
+            assertStringArguments({ jobId: jobId });
+
             if (useSse && typeof EventSource !== 'undefined') {
                 return track(jobId, callback);
             }
@@ -185,8 +219,11 @@ function makeApiClient(baseUrl, fetch, token) {
         var closed = false;
 
         function close() {
-            closed = true;
-            sse.close();
+            if (!closed) {
+                closed = true;
+                sse.close();
+                callback('close');
+            }
         }
 
         sse.onmessage(function(event) {
@@ -199,6 +236,7 @@ function makeApiClient(baseUrl, fetch, token) {
             try {
                 jobEvent = JSON.parse(event.data);
             } catch (e) {
+                callback('error', new Error('Error parsing event data.'));
                 return;
             }
 
@@ -206,11 +244,15 @@ function makeApiClient(baseUrl, fetch, token) {
                 return;
             }
 
+            callback(event);
+
             if (jobEvent.name === 'success' || jobEvent.name === 'fail') {
                 close();
             }
+        });
 
-            callback(event);
+        sse.onerror(function(error) {
+            callback('error', error);
         });
 
         return close;
@@ -220,6 +262,13 @@ function makeApiClient(baseUrl, fetch, token) {
         var offset = 0;
         var backoff = 0;
         var stopped = false;
+
+        function stop() {
+            if (!stopped) {
+                stopped = true;
+                callback('close');
+            }
+        }
 
         function run() {
             return delay(dt)
@@ -237,17 +286,19 @@ function makeApiClient(baseUrl, fetch, token) {
                                 // client must change something before the
                                 // request can work.
                                 if (error.status < 500) {
-                                    stopped = true;
-                                    console.error('Error communicating with API:', message);
+                                    callback('error', error);
+                                    stop();
                                     return;
                                 }
 
                                 // 5xy errors lead to retries with backoff.
+                                callback('error', error);
+
                                 backoff += 1;
 
-                                const backoffTime = dt + backoff * dt;
+                                const backoffTime = ((dt + backoff * dt) / 1000).toFixed(1);
 
-                                console.warn('Error contacting API. Retrying in ' + (backoffTime / 1000).toFixed(1) + ' s. ', message);
+                                console.warn('Error contacting API. Retrying in ' + backoffTime + ' s. ', message);
 
                                 return delay(backoff * dt)
                                     .then(function() {
@@ -271,6 +322,10 @@ function makeApiClient(baseUrl, fetch, token) {
 
                     events.forEach(function(event) {
                         callback(event);
+
+                        if (event === 'success' || event === 'fail') {
+                            stop();
+                        }
                     });
                 })
                 .then(function() {
@@ -282,9 +337,7 @@ function makeApiClient(baseUrl, fetch, token) {
 
         run();
 
-        return function stop() {
-            stopped = true;
-        };
+        return stop;
     }
 
     return api;
@@ -394,20 +447,27 @@ export function createEndUserSdk(options) {
         createJobInput: function(data, key, stage) {
             return apiClient.createJobInput(jobId, data, key, stage);
         },
-        getJobOutputs: function(key, stage) {
+        getJobOutputs: function() {
+            return apiClient.getJobOutputs(jobId);
+        },
+        getJobOutput: function(key, stage) {
             return apiClient.getJobOutputs(jobId, key, stage);
         },
         getJobScreenshots: function() {
             return apiClient.getJobScreenshots(jobId);
         },
-        getJobScreenshot: function(id, ext) {
-            return apiClient.getJobScreenshot(jobId, id, ext);
+        getJobScreenshot: function(idOrPath) {
+            if (idOrPath && idOrPath[0] === '/') {
+                return apiClient.getJobScreenshot(idOrPath);
+            }
+
+            return apiClient.getJobScreenshot(jobId, idOrPath);
         },
         getJobMimoLogs: function() {
             return apiClient.getJobMimoLogs(jobId);
         },
-        getJobEndUser: function() {
-            return apiClient.getJobEndUser(jobId);
+        getJobEvents: function(offset) {
+            return apiClient.getJobEvents(jobId, offset);
         },
         trackJob: function(callback) {
             return apiClient.trackJob(jobId, callback);
