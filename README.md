@@ -237,7 +237,7 @@ Resets a job.
 
 Creates a new input with some `data` under `key`.
 
-#### `getJobOutputs(jobId)
+#### `getJobOutputs(jobId)`
 
 Gets the outputs of a job.
 
@@ -273,7 +273,7 @@ you may use to delegate operations on the job to a customer.
 Gets the events for a given jobId. Use the offset to skip some jobs (useful
 when manually polling for new events).
 
-#### trackJob(jobId, callback)
+#### `trackJob(jobId, callback)`
 
 **Warning: Subject to change!**
 
@@ -282,12 +282,12 @@ Track a job. Returns a function which may be called to stop tracking.
 The callback will be called with the event name. Job event names are:
 
  - `"restart"`
- - `"success"
- - `"fail"
- - `"awaitingInput"
- - `"createOutput"
- - `"tdsStart"
- - `"tdsFinish`"
+ - `"success"`
+ - `"fail"`
+ - `"awaitingInput"`
+ - `"createOutput"`
+ - `"tdsStart"`
+ - `"tdsFinish`"`
 
 Two special events may also be emitted:
 
@@ -383,9 +383,3 @@ same-named method of the client sdk for more information.
 #### `vaultPan`
 
 Sends a PAN to the vault. Resolves to a token to use in its stead.
-
-## TODO
-
-- pjo
-- outputs
-- higher level job object with events
