@@ -73,8 +73,8 @@ the code for this client may be useful to you as a reference).
 
 ## The client flow
 
-Your customer decides to make a purchase! On their behalf, you compose a job,
-and POST it to our API to formally create it.
+Your customer decides to make a purchase! On their behalf, you compose a job and
+POST it to our API to create it.
 
 ```javascript
 // On your server.
@@ -124,20 +124,27 @@ async function onSubmit(input) {
         serviceId: endUser.serviceId
     });
 
-    // Track the job. On state change, the callback will be called
-    // with the current job object and the previous job object.
+    // Track the job. When an event occurs the callback will be called. Errors
+    // lead to the callback being called with the "error" event name and an
+    // error instance.
+    //
     // When the job reaches a state of "success" or "fail" tracking
-    // will stop and this function will resolve.
-    await endUserSdk.trackJob(job.id, async (current, previous) => {
-        if (current.state === 'awaitingInput') {
+    // will stop and this function will resolve. The call to trackJob returns
+    // a function which, when called, will manually stop tracking.
+    const close = endUserSdk.trackJob(job.id, async (eventName, error) => {
+        if (eventName === 'awaitingInput') {
             // ask user for input
             const data = await getInputFromUser();
 
             await createJobInput(data, key);
         }
-    });
 
-    console.log('done!');
+        // The 'close' event is emitted only once, and no other events will
+        // follow.
+        if (eventName === 'close') {
+            console.log('done!');
+        }
+    });
 }
 ```
 
@@ -157,17 +164,7 @@ const sdk = createClientSdk({
 
 ### Methods
 
-All methods of the sdk object return a `Promise` instance.
-
-#### body
-
-The body, when given, should be an object, not a string. This library handles
-stringification for you.
-
-#### query
-
-A query may be given as an object. This library will properly format it and
-append it to the url for you.
+All methods of the sdk object return a `Promise` instance except for `trackJob`.
 
 #### `raw(path, options)`
 
@@ -196,18 +193,199 @@ Get a list of your services.
 
 Get a single service by its ID.
 
+#### `getPreviousJobOutputs(serviceId, inputs)`
+
+Gets the outputs of previous jobs, optionally filtering by a list of inputs.
+
 #### `getJobs(query)`
 
 Get a list of your jobs. The query has the following optional fields which may
 be used to refine the list:
 
+| name | description | default |
+| serviceId | | none |
+| state| `"processing"`, `"awaitingInput"`, `"awaitingTds"`, `"success"`, or `"fail"`. | none |
+| category | One of `"live"` or `"test"`. | none |
+| limit | The maximum number of jobs to respond with, from 0 to 100. | 100 |
+| offset | Skip the first n jobs. | 0 |
+| sort | Use `"createdAt"` to revere the sort order to ascending. | `"-createdAt"` |
+
+#### `createJob(fields)`
+
+Create a job with the following fields:
+
+| name | required | description | default |
+| serviceId | true | | |
+| callbackUrl | false | A callback URL to make a request to when particular events occur. | none |
+| input | false | A prepopulated set of inputs. | `{}` |
+| category | false | `"live"` or `"test"` | `"live"` |
+| scriptVersion | false | A specific version of the script to use. | Defaults to the published version. |
+
+#### `getJob(jobId)`
+
+Gets a job.
+
+#### `cancelJob(jobId)`
+
+Cancels a job.
+
+#### `resetJob(jobId)`
+
+Resets a job.
+
+#### `createJobInput(jobId, data, key)`
+
+Creates a new input with some `data` under `key`.
+
+#### `getJobOutputs(jobId)
+
+Gets the outputs of a job.
+
+#### `getJobOutput(jobId, key)`
+
+Gets a particular output of a job.
+
+#### `getJobScreenshots(jobId)`
+
+Gets the metadata for all screenshots of a job.
+
+#### `getJobScreenshot(jobId, id)`
+
+Gets a screenshot by jobId and id. Resolves to a blob.
+
+#### `getJobScreenshot(path)`
+
+The endpoint`getJobScreenshots` returns metadata for screenshots, and a `url`
+field may be found in each. This field can be passed to `getJobScreenshot`
+directly. Resolves to a blob.
+
+#### `getMimoLogs(jobId)`
+
+Gets the MIMO logs for a job by jobId.
+
+#### `getJobEndUser(jobId)`
+
+Gets the end-user entity associated with a job. This entity includes a token
+you may use to delegate operations on the job to a customer.
+
+#### `getJobEvents(jobId, offset = 0)`
+
+Gets the events for a given jobId. Use the offset to skip some jobs (useful
+when manually polling for new events).
+
+#### trackJob(jobId, callback)
+
+**Warning: Subject to change!**
+
+Track a job. Returns a function which may be called to stop tracking.
+
+The callback will be called with the event name. Job event names are:
+
+ - `"restart"`
+ - `"success"
+ - `"fail"
+ - `"awaitingInput"
+ - `"createOutput"
+ - `"tdsStart"
+ - `"tdsFinish`"
+
+Two special events may also be emitted:
+
+ - `"error"`
+ - `"close"`
+
+When called with the `"error"` event name, the second parameter will be an error
+object. In the future other events may also come with data like this.
+
+The `"close"` event is always the last event and happens only once. It occurs
+after certain errors (particularly 4xy request errors), after `"success"` or
+`"fail"` events, or after the function returned by the call to `trackJob` is
+called. It will only be emitted once.
+
+## end-user API
+
+### Instantiating
+
+The end-user API requires an end-user `token`, a `serviceId`, and a `jobId`.
+
 ```javascript
-{
-    serviceId,
-    state,     // one of 'processing', 'awaitingInput', 'awaitingTds', 'success', or 'fail'
-    category,  // one of 'live' or 'test
-    limit,     // a number from 0 to 100, defaulting to 100
-    offset,    // an offset, defaulting to 0
-    sort       // use "createdAt" to reverse the order of the sort to ascending
-}
+const sdk = createClientSdk({
+    token,     // required
+    serviceId, // required
+    jobId,     // required
+    fetch,     // required in Node
+    apiUrl,    // optional, defaults to api.automationcloud.net
+    vaultUrl   // optional, defaults to vault.automationcloud.net
+})
 ```
+
+### Methods
+
+All methods of the sdk object return a `Promise` instance except for `trackJob`
+and `vaultPan`.
+
+#### `getService()`
+
+Gets the service which this `sdk` instance is associated with.
+
+#### `getJob()`
+
+Gets the job which this `sdk` is associated with.
+
+#### `cancelJob()`
+
+Cancels the job which this `sdk` is associated with.
+
+#### `resetJob()`
+
+Resets the job which this `sdk` is associated with.
+
+#### `createJobInput(data, key)`
+
+Creates an input for the job which this `sdk` is associated with, under `key`.
+
+#### `getJobOutputs()`
+
+Gets the outputs of the job which this `sdk` is associated with.
+
+#### `getJobOutput(key)`
+
+Gets the output of the job which this `sdk` is associated with, under `key`.
+
+#### `getJobScreenshots()`
+
+Gets the metadata of screenshots for the job which this `sdk` is associated
+with.
+
+#### `getJobScreenshot(id)`
+
+Gets a screenshot the job which this `sdk` is associated with by `id`.
+
+#### `getJobScreenshot(path)`
+
+The `getJobScreenshots` method returns a list of metadata of screenshots. Each
+includes a `url` field, which may be used to call `getJobScreenshot`.
+
+#### `getJobMimoLogs()`
+
+Gets the MIMO logs for the job which this `sdk` is associated with.
+
+#### `getJobEvents(offset = 0)`
+
+Gets events for the job which this `sdk` is associated with. When an offset is
+given, that number of events will be skipped.
+
+#### `trackJob`
+
+Tracks the events of the job which this `sdk` is associated with. See the
+same-named method of the client sdk for more information.
+
+#### `vaultPan`
+
+Sends a PAN to the vault. Resolves to a token to use in its stead.
+
+## TODO
+
+- pjo
+- outputs
+- higher level job object with events
