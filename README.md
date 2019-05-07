@@ -1,3 +1,5 @@
+⚠️ **This library is in beta and subject to change.** ⚠️
+
 # JavaScript Software Development Kit (SDK) for UBIO
 
 This SDK may be used by a client or an end-user of UBIO, with slightly differing
