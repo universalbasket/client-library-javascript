@@ -11,6 +11,7 @@ const app = express();
 const sdk = createClientSdk({ token: CLIENT_TOKEN, fetch });
 
 app.use(express.static('public'));
+app.use('/modules', express.static('web_modules'));
 app.post('/create-job', bodyParser.json(), async (req, res) => {
     try {
         const { id: jobId } = await sdk.createJob({ serviceId: SERVICE_ID, input: req.body.input });

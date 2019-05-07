@@ -1,5 +1,7 @@
-import { createEndUserSdk } from '/sdk.js';
+import { createEndUserSdk } from '/modules/@ubio/sdk.js';
 
+// The server is a client of the ubio REST API. It creates a job using data the
+// browser sends.
 async function createJob(input) {
     const res = await fetch('/create-job', {
         method: 'POST',
@@ -14,21 +16,34 @@ async function createJob(input) {
     return await res.json();
 }
 
-async function listenForJobChanges({ token, jobId, serviceId }) {
-    // const sdk = createEndUserSdk({ token, jobId,  })
-    const sdk = createEndUserSdk({ token, jobId, serviceId });
-
-    window.sdk = sdk;
-
-    await sdk.trackJob((current, previous) => {
-        console.log(`state change from ${previous.state} to ${current.state}.`);
-    });
-}
-
 window.start.onclick = async () => {
     window.start.onclick = null;
 
     const { token, jobId, serviceId } = await createJob();
+    const sdk = createEndUserSdk({ token, jobId, serviceId });
 
-    await listenForJobChanges({ token, jobId, serviceId });
+    let job;
+    let outputs = [];
+
+    sdk.trackJob(async (name, error) => {
+        if (name === 'error') {
+            console.error(error);
+        }
+
+        if (name === 'awaitingInput') {
+            job = await sdk.getJob(); // eslint-disable-line no-unused-vars
+
+            // Render a form to ask for job.awaitingInputKey and call sdk.createJobInput.
+        }
+
+        if (name === 'createOutput') {
+            const updatedOutputs = sdk.getJobOutputs();
+
+            // Compare with outputs and append any new ones.
+        }
+
+        if (name === 'close') {
+            console.log('Tracking ended.');
+        }
+    });
 };
