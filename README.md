@@ -26,10 +26,13 @@ npx @pika/web
 ```
 
 If you want to quickly try out this module you can use
-[unpkg.com][https://unpkg.com] (not recommended for production):
+[unpkg.com](https://unpkg.com) (not recommended for production):
 
 ```javascript
-import { createClientSdk, createEndUserSdk } from 'https://unpkg.com/@ubio/sdk?module';
+import {
+    createClientSdk,
+    createEndUserSdk
+} from 'https://unpkg.com/@ubio/sdk?module';
 
 // ...
 ```
@@ -84,11 +87,10 @@ const { createClientSdk } = require('@ubio/sdk');
 const fetch = require('node-fetch');
 const token = process.env.UBIO_CLIENT_TOKEN;
 const serviceId = process.env.UBIO_SERVICE_ID;
-const scriptVersion = process.end.UBIO_SCRIPT_VERSION;
 const clientSdk = createClientSdk({ fetch, token });
 
 async function createJob(input) {
-    const job = await clientSdk.createJob({ serviceId, scriptVersion, input });
+    const job = await clientSdk.createJob({ serviceId, input });
     const endUser = await clientSdk.getJobEndUser(job.id);
 
     return endUser; // Contains jobId, serviceId, and token fields.
