@@ -23,7 +23,7 @@ window.start.onclick = async () => {
     const sdk = createEndUserSdk({ token, jobId, serviceId });
 
     let job;
-    let outputs = [];
+    const outputs = [];
 
     sdk.trackJob(async (name, error) => {
         if (name === 'error') {
