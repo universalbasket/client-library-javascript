@@ -136,7 +136,7 @@ async function onSubmit(input) {
             // ask user for input
             const data = await getInputFromUser();
 
-            await createJobInput(data, key);
+            await createJobInput(key, data);
         }
 
         // The 'close' event is emitted only once, and no other events will
@@ -233,7 +233,7 @@ Cancels a job.
 
 Resets a job.
 
-#### `createJobInput(jobId, data, key)`
+#### `createJobInput(jobId, key, data)`
 
 Creates a new input with some `data` under `key`.
 
@@ -340,7 +340,7 @@ Cancels the job which this `sdk` is associated with.
 
 Resets the job which this `sdk` is associated with.
 
-#### `createJobInput(data, key)`
+#### `createJobInput(key, data)`
 
 Creates an input for the job which this `sdk` is associated with, under `key`.
 
