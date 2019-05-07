@@ -143,7 +143,7 @@ function makeApiClient(baseUrl, fetch, token) {
             assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/reset', { method: 'POST' });
         },
-        createJobInput: function(jobId, data, key, stage) {
+        createJobInput: function(jobId, key, data, stage) {
             assertStringArguments({ jobId: jobId, key: key });
             return apiFetch('jobs/' + jobId + '/inputs', { method: 'POST', body: { key, stage, data } });
         },
@@ -448,8 +448,8 @@ export function createEndUserSdk(options) {
         resetJob: function(jobId) {
             return apiClient.resetJob(jobId);
         },
-        createJobInput: function(data, key, stage) {
-            return apiClient.createJobInput(jobId, data, key, stage);
+        createJobInput: function(key, data, stage) {
+            return apiClient.createJobInput(jobId, key, data, stage);
         },
         getJobOutputs: function() {
             return apiClient.getJobOutputs(jobId);
