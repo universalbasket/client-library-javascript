@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "check": "eslint .",
     "build": "rollup -f umd -n ubioSdk index.js -o index.umd.js",
-    "clean": "rimraf index.umd.js"
+    "clean": "rimraf index.umd.js",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "index.js",
