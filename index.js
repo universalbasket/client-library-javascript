@@ -249,7 +249,7 @@ function makeApiClient(baseUrl, fetch, token) {
                 return;
             }
 
-            callback(event);
+            callback(jobEvent.name);
 
             if (jobEvent.name === 'success' || jobEvent.name === 'fail') {
                 close();
