@@ -1,6 +1,6 @@
 {
   "name": "@ubio/sdk",
-  "version": "0.0.0",
+  "version": "0.4.0",
   "description": "JavaScript SDK for integrating with ubio.",
   "main": "index.umd.js",
   "module": "index.js",
