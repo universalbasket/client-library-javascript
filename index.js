@@ -325,9 +325,9 @@ function makeApiClient(baseUrl, fetch, token) {
                     });
 
                     events.forEach(function(event) {
-                        callback(event);
+                        callback(event.name);
 
-                        if (event === 'success' || event === 'fail') {
+                        if (event.name === 'success' || event.name === 'fail') {
                             stop();
                         }
                     });
