@@ -207,6 +207,7 @@ Get a list of your jobs. The query has the following optional fields which may
 be used to refine the list:
 
 | name | description | default |
+| ---- | ----------- | ------- |
 | serviceId | | none |
 | state| `"processing"`, `"awaitingInput"`, `"awaitingTds"`, `"success"`, or `"fail"`. | none |
 | category | One of `"live"` or `"test"`. | none |
@@ -219,6 +220,7 @@ be used to refine the list:
 Create a job with the following fields:
 
 | name | required | description | default |
+| ---- | -------- | ----------- | ------- |
 | serviceId | true | | |
 | callbackUrl | false | A callback URL to make a request to when particular events occur. | none |
 | input | false | A prepopulated set of inputs. | `{}` |
