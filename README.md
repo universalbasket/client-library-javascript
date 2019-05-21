@@ -235,7 +235,7 @@ Gets a job.
 
 Cancels a job.
 
-#### `resetJob(jobId)`
+#### `resetJob(jobId, fromInputKey, preserveInputs)`
 
 Resets a job.
 
@@ -342,7 +342,7 @@ Gets the job which this `sdk` is associated with.
 
 Cancels the job which this `sdk` is associated with.
 
-#### `resetJob()`
+#### `resetJob(fromInputKey, preserveInputs)`
 
 Resets the job which this `sdk` is associated with.
 
