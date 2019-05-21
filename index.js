@@ -139,9 +139,11 @@ function makeApiClient(baseUrl, fetch, token) {
             assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/cancel', { method: 'POST' });
         },
-        resetJob: function(jobId) {
+        resetJob: function(jobId, fromInputKey, preserveInputs) {
             assertStringArguments({ jobId: jobId });
-            return apiFetch('jobs/' + jobId + '/reset', { method: 'POST' });
+            const body = { fromInputKey: fromInputKey, preserveInputs: preserveInputs || [] };
+
+            return apiFetch('jobs/' + jobId + '/reset', { method: 'POST', body: body });
         },
         createJobInput: function(jobId, key, data, stage) {
             assertStringArguments({ jobId: jobId, key: key });
@@ -436,7 +438,7 @@ export function createEndUserSdk(options) {
         getService: function() {
             return apiClient.getService(serviceId);
         },
-        getPreviousJobOuputs: function(inputs) {
+        getPreviousJobOutputs: function(inputs) {
             return apiClient.getPreviousJobOutputs(serviceId, inputs);
         },
         getJob: function() {
@@ -445,8 +447,8 @@ export function createEndUserSdk(options) {
         cancelJob: function() {
             return apiClient.cancelJob(jobId);
         },
-        resetJob: function(jobId) {
-            return apiClient.resetJob(jobId);
+        resetJob: function(jobId, fromInputKey, preserveInputs) {
+            return apiClient.resetJob(jobId, fromInputKey, preserveInputs);
         },
         createJobInput: function(key, data, stage) {
             return apiClient.createJobInput(jobId, key, data, stage);
@@ -455,7 +457,7 @@ export function createEndUserSdk(options) {
             return apiClient.getJobOutputs(jobId);
         },
         getJobOutput: function(key, stage) {
-            return apiClient.getJobOutputs(jobId, key, stage);
+            return apiClient.getJobOutput(jobId, key, stage);
         },
         getJobScreenshots: function() {
             return apiClient.getJobScreenshots(jobId);
