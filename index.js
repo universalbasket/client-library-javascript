@@ -380,6 +380,12 @@ function makeVaultClient(baseUrl, fetch, token) {
                 .then(function(temp) {
                     return temp.panToken;
                 });
+        },
+        getOtp: function() {
+            return vaultFetch('otp', { method: 'POST' })
+                .then(function(otp) {
+                    return otp.id;
+                });
         }
     };
 }
@@ -447,7 +453,7 @@ export function createEndUserSdk(options) {
         cancelJob: function() {
             return apiClient.cancelJob(jobId);
         },
-        resetJob: function(jobId, fromInputKey, preserveInputs) {
+        resetJob: function(fromInputKey, preserveInputs) {
             return apiClient.resetJob(jobId, fromInputKey, preserveInputs);
         },
         createJobInput: function(key, data, stage) {
