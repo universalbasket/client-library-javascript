@@ -359,13 +359,13 @@ function makeVaultClient(baseUrl, fetch, token) {
     var api = {
         createOtp: function() {
             return vaultFetch('otp', { method: 'POST' })
-                .then(function(otp) {
+                .then(function unwrapOtp(otp) {
                     return otp.id;
                 });
         },
         vaultPan: function(pan) {
             return api.createOtp()
-                .then(function(otp) {
+                .then(function envaultPan(otp) {
                     return vaultFetch('pan', {
                         method: 'POST',
                         body: {
@@ -374,7 +374,7 @@ function makeVaultClient(baseUrl, fetch, token) {
                         }
                     });
                 })
-                .then(function(pan) {
+                .then(function getPanToken(pan) {
                     return vaultFetch('pan/temporary', {
                         method: 'POST',
                         body: {
@@ -383,7 +383,7 @@ function makeVaultClient(baseUrl, fetch, token) {
                         }
                     });
                 })
-                .then(function(temp) {
+                .then(function unwrapPanToken(temp) {
                     return temp.panToken;
                 });
         }
