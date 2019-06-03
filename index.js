@@ -356,9 +356,12 @@ function makeVaultClient(baseUrl, fetch, token) {
         return fetchWrapper(canonicalizedBaseiUrl + path, fetch, token, options);
     }
 
-    return {
+    var api = {
+        createOtp: function() {
+            return vaultFetch('otp', { method: 'POST' });
+        },
         vaultPan: function(pan) {
-            return vaultFetch('otp', { method: 'POST' })
+            return api.createOtp()
                 .then(function(otp) {
                     return vaultFetch('pan', {
                         method: 'POST',
@@ -382,6 +385,8 @@ function makeVaultClient(baseUrl, fetch, token) {
                 });
         }
     };
+
+    return api;
 }
 
 /**
@@ -396,10 +401,18 @@ export function createClientSdk(options) {
     }
 
     var apiUrl = options.apiUrl || defaultApiUrl;
+    var vaultUrl = options.vaultUrl || defaultVaultUrl;
     var fetch = options.fetch || defaultFetch;
     var token = options.token;
 
-    return makeApiClient(apiUrl, fetch, token);
+    var apiClient = makeApiClient(apiUrl, fetch, token);
+    var vaultClient = makeVaultClient(vaultUrl, fetch, token);
+
+    apiClient.createOtp = function createOtp() {
+        return vaultClient.createOtp();
+    };
+
+    return apiClient;
 }
 
 /**
@@ -447,7 +460,7 @@ export function createEndUserSdk(options) {
         cancelJob: function() {
             return apiClient.cancelJob(jobId);
         },
-        resetJob: function(jobId, fromInputKey, preserveInputs) {
+        resetJob: function(fromInputKey, preserveInputs) {
             return apiClient.resetJob(jobId, fromInputKey, preserveInputs);
         },
         createJobInput: function(key, data, stage) {
@@ -477,6 +490,9 @@ export function createEndUserSdk(options) {
         },
         trackJob: function(callback) {
             return apiClient.trackJob(jobId, callback);
+        },
+        createOtp: function() {
+            return vaultClient.createOtp();
         },
         vaultPan: function(pan) {
             return vaultClient.vaultPan(pan);
