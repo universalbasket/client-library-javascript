@@ -10,11 +10,11 @@
   "repository": "github:universalbasket/javascript-sdk",
   "license": "ISC",
   "dependencies": {
+    "@pika/web": "^0.4.2",
     "@ubio/sdk": "file:..",
     "body-parser": "^1.18.3",
-    "express": "^4.16.4",
-    "@pika/web": "^0.4.2",
-    "node-fetch": "^2.3.0"
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0"
   },
   "@pika/web": {
     "webDependencies": [
