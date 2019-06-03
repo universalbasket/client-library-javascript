@@ -358,7 +358,10 @@ function makeVaultClient(baseUrl, fetch, token) {
 
     var api = {
         createOtp: function() {
-            return vaultFetch('otp', { method: 'POST' });
+            return vaultFetch('otp', { method: 'POST' })
+                .then(function(otp) {
+                    return otp.id;
+                });
         },
         vaultPan: function(pan) {
             return api.createOtp()
@@ -366,7 +369,7 @@ function makeVaultClient(baseUrl, fetch, token) {
                     return vaultFetch('pan', {
                         method: 'POST',
                         body: {
-                            otp: otp.id,
+                            otp: otp,
                             pan: pan
                         }
                     });
