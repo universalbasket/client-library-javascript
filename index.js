@@ -356,19 +356,25 @@ function makeVaultClient(baseUrl, fetch, token) {
         return fetchWrapper(canonicalizedBaseiUrl + path, fetch, token, options);
     }
 
-    return {
-        vaultPan: function(pan) {
+    var api = {
+        createOtp: function() {
             return vaultFetch('otp', { method: 'POST' })
-                .then(function(otp) {
+                .then(function unwrapOtp(otp) {
+                    return otp.id;
+                });
+        },
+        vaultPan: function(pan) {
+            return api.createOtp()
+                .then(function envaultPan(otp) {
                     return vaultFetch('pan', {
                         method: 'POST',
                         body: {
-                            otp: otp.id,
+                            otp: otp,
                             pan: pan
                         }
                     });
                 })
-                .then(function(pan) {
+                .then(function getPanToken(pan) {
                     return vaultFetch('pan/temporary', {
                         method: 'POST',
                         body: {
@@ -377,11 +383,13 @@ function makeVaultClient(baseUrl, fetch, token) {
                         }
                     });
                 })
-                .then(function(temp) {
+                .then(function unwrapPanToken(temp) {
                     return temp.panToken;
                 });
         }
     };
+
+    return api;
 }
 
 /**
@@ -396,10 +404,18 @@ export function createClientSdk(options) {
     }
 
     var apiUrl = options.apiUrl || defaultApiUrl;
+    var vaultUrl = options.vaultUrl || defaultVaultUrl;
     var fetch = options.fetch || defaultFetch;
     var token = options.token;
 
-    return makeApiClient(apiUrl, fetch, token);
+    var apiClient = makeApiClient(apiUrl, fetch, token);
+    var vaultClient = makeVaultClient(vaultUrl, fetch, token);
+
+    apiClient.createOtp = function createOtp() {
+        return vaultClient.createOtp();
+    };
+
+    return apiClient;
 }
 
 /**
@@ -447,7 +463,7 @@ export function createEndUserSdk(options) {
         cancelJob: function() {
             return apiClient.cancelJob(jobId);
         },
-        resetJob: function(jobId, fromInputKey, preserveInputs) {
+        resetJob: function(fromInputKey, preserveInputs) {
             return apiClient.resetJob(jobId, fromInputKey, preserveInputs);
         },
         createJobInput: function(key, data, stage) {
@@ -477,6 +493,9 @@ export function createEndUserSdk(options) {
         },
         trackJob: function(callback) {
             return apiClient.trackJob(jobId, callback);
+        },
+        createOtp: function() {
+            return vaultClient.createOtp();
         },
         vaultPan: function(pan) {
             return vaultClient.vaultPan(pan);

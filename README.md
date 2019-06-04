@@ -46,7 +46,7 @@ You may also use the module as an old fashioned global:
 </script>
 ```
 
-You cam also use this module with [Browserify](http://browserify.org/),
+You can also use this module with [Browserify](http://browserify.org/),
 [webpack](https://webpack.js.org/), [RequireJS](https://requirejs.org/)... you
 get the picture.
 
@@ -160,9 +160,10 @@ The client API requires a client token.
 
 ```javascript
 const sdk = createClientSdk({
-    token, // required
-    fetch, // required in Node
-    apiUrl // optional, defaults to api.automationcloud.net
+    token,   // required
+    fetch,   // required in Node
+    apiUrl,  // optional, defaults to api.automationcloud.net
+    vaultUrl // optional, defaults to vault.automationcloud.net
 })
 ```
 
@@ -308,6 +309,10 @@ after certain errors (particularly 4xy request errors), after `"success"` or
 `"fail"` events, or after the function returned by the call to `trackJob` is
 called. It will only be emitted once.
 
+#### `createOtp()`
+
+Creates a one time password which may be used to vault a PAN.
+
 ## end-user API
 
 ### Instantiating
@@ -381,11 +386,16 @@ Gets the MIMO logs for the job which this `sdk` is associated with.
 Gets events for the job which this `sdk` is associated with. When an offset is
 given, that number of events will be skipped.
 
-#### `trackJob`
+#### `trackJob()`
 
 Tracks the events of the job which this `sdk` is associated with. See the
 same-named method of the client sdk for more information.
 
-#### `vaultPan`
+#### `createOtp()`
+
+Creates a one time password which may be used to vault a PAN. Not necessary if
+the `vaultPan` method can be used.
+
+#### `vaultPan(pan)`
 
 Sends a PAN to the vault. Resolves to a token to use in its stead.
