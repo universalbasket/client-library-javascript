@@ -280,6 +280,14 @@ you may use to delegate operations on the job to a customer.
 Gets the events for a given jobId. Use the offset to skip some jobs (useful
 when manually polling for new events).
 
+#### `getJobFiles(jobId)`
+
+Gets the metadata of the files uploaded for a given job.
+
+#### `getJobFile(jobId, fileId|fileUrl)`
+
+Gets the data for a given file as a [blob][blob].
+
 #### `trackJob(jobId, callback)`
 
 **Warning: Subject to change!**
@@ -386,6 +394,14 @@ Gets the MIMO logs for the job which this `sdk` is associated with.
 Gets events for the job which this `sdk` is associated with. When an offset is
 given, that number of events will be skipped.
 
+#### `getJobFiles()`
+
+Gets the metadata of the files uploaded for the job.
+
+#### `getJobFile(fileId|fileUrl)`
+
+Gets the data for a given file as a [blob][blob].
+
 #### `trackJob()`
 
 Tracks the events of the job which this `sdk` is associated with. See the
@@ -399,3 +415,5 @@ the `vaultPan` method can be used.
 #### `vaultPan(pan)`
 
 Sends a PAN to the vault. Resolves to a token to use in its stead.
+
+[blob]: https://developer.mozilla.org/en-US/docs/Web/API/Blob
