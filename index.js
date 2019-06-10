@@ -200,6 +200,21 @@ function makeApiClient(baseUrl, fetch, token) {
 
             return apiFetch('jobs/' + jobId + '/events', { query: { offset: offset || 0 } });
         },
+        getJobFiles: function(jobId) {
+            assertStringArguments({ jobId: jobId });
+            return apiFetch('jobs/', + jobId + '/files');
+        },
+        getJobFile: function(jobId, fileId) {
+            assertStringArguments({ jobId: jobId, fileId: fileId });
+
+            var isUrl = fileId.indexOf(canonicalizedBaseiUrl) === 0;
+            var url = isUrl ? fileId.slice(canonicalizedBaseiUrl.length) : 'jobs/' + jobId + '/files/' + fileId;
+
+            return apiFetch(url, { parse: false })
+                .then(function(res) {
+                    return res.blob();
+                });
+        },
         trackJob: function(jobId, callback) {
             assertStringArguments({ jobId: jobId });
 
@@ -490,6 +505,12 @@ export function createEndUserSdk(options) {
         },
         getJobEvents: function(offset) {
             return apiClient.getJobEvents(jobId, offset);
+        },
+        getJobFiles: function() {
+            return apiClient.getJobFiles(jobId);
+        },
+        getJobFile: function(fileId) {
+            return apiClient.getJobFile(jobId, fileId);
         },
         trackJob: function(callback) {
             return apiClient.trackJob(jobId, callback);
