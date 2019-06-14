@@ -207,7 +207,19 @@ function makeApiClient(baseUrl, fetch, token) {
         getJobFile: function(jobId, fileId) {
             assertStringArguments({ jobId: jobId, fileId: fileId });
 
-            var isUrl = fileId.indexOf(canonicalizedBaseiUrl) === 0;
+            var isUrl = fileId.indexOf('http') === 0;
+
+            if (isUrl && fileId.indexOf(canonicalizedBaseiUrl) !== 0) {
+                return fetch(fileId)
+                    .then(function(res) {
+                        if (!res.ok) {
+                            throw new Error(`Unexpected status for request to ${fileId}: ${res.status}`);
+                        }
+
+                        return res.blob();
+                    });
+            }
+
             var url = isUrl ? fileId.slice(canonicalizedBaseiUrl.length) : 'jobs/' + jobId + '/files/' + fileId;
 
             return apiFetch(url, { parse: false })
