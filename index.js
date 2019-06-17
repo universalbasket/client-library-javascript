@@ -227,6 +227,10 @@ function makeApiClient(baseUrl, fetch, token) {
                     return res.blob();
                 });
         },
+        getActiveTds: function(jobId) {
+            assertStringArguments({ jobId: jobId });
+            return apiFetch('jobs/', + jobId + '/active-3d-secure');
+        },
         trackJob: function(jobId, callback) {
             assertStringArguments({ jobId: jobId });
 
