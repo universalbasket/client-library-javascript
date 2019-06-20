@@ -288,7 +288,7 @@ Gets the metadata of the files uploaded for a given job.
 
 Gets the data for a given file as a [blob][blob].
 
-#### `getActiveTds`(jobId)`
+#### `getActiveTds(jobId)`
 
 Gets the active 3D Secure session for the given job.
 
@@ -406,7 +406,7 @@ Gets the metadata of the files uploaded for the job.
 
 Gets the data for a given file as a [blob][blob].
 
-#### `getActiveTds`()`
+#### `getActiveTds()`
 
 Gets the active 3D Secure session for the job.
 
