@@ -288,6 +288,10 @@ Gets the metadata of the files uploaded for a given job.
 
 Gets the data for a given file as a [blob][blob].
 
+#### `getActiveTds`(jobId)`
+
+Gets the active 3D Secure session for the given job.
+
 #### `trackJob(jobId, callback)`
 
 **Warning: Subject to change!**
@@ -401,6 +405,10 @@ Gets the metadata of the files uploaded for the job.
 #### `getJobFile(fileId|fileUrl)`
 
 Gets the data for a given file as a [blob][blob].
+
+#### `getActiveTds`()`
+
+Gets the active 3D Secure session for the job.
 
 #### `trackJob()`
 

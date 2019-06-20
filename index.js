@@ -229,7 +229,7 @@ function makeApiClient(baseUrl, fetch, token) {
         },
         getActiveTds: function(jobId) {
             assertStringArguments({ jobId: jobId });
-            return apiFetch('jobs/', + jobId + '/active-3d-secure');
+            return apiFetch('jobs/' + jobId + '/active-3d-secure');
         },
         trackJob: function(jobId, callback) {
             assertStringArguments({ jobId: jobId });
@@ -527,6 +527,9 @@ export function createEndUserSdk(options) {
         },
         getJobFile: function(fileId) {
             return apiClient.getJobFile(jobId, fileId);
+        },
+        getActiveTds: function() {
+            return apiClient.getActiveTds(jobId);
         },
         trackJob: function(callback) {
             return apiClient.trackJob(jobId, callback);
