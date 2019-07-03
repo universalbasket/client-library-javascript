@@ -198,9 +198,10 @@ Get a list of your services.
 
 Get a single service by its ID.
 
-#### `getPreviousJobOutputs(serviceId, inputs)`
+#### `getPreviousJobOutputs(serviceId, inputs, key)`
 
-Gets the outputs of previous jobs, optionally filtering by a list of inputs.
+Gets the outputs of previous jobs, optionally filtering by an optional list of
+inputs and an optional output key.
 
 #### `getJobs(query)`
 
@@ -350,6 +351,11 @@ and `vaultPan`.
 #### `getService()`
 
 Gets the service which this `sdk` instance is associated with.
+
+#### `getPreviousJobOutputs(inputs, key)`
+
+Gets the outputs of previous jobs, optionally filtering by an optional list of
+inputs and an optional output key.
 
 #### `getJob()`
 
