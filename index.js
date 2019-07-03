@@ -119,11 +119,12 @@ function makeApiClient(baseUrl, fetch, token) {
             assertStringArguments({ serviceId: serviceId });
             return apiFetch('services/' + serviceId);
         },
-        getPreviousJobOutputs: function(serviceId, inputs) {
+        getPreviousJobOutputs: function(serviceId, inputs, key) {
             assertStringArguments({ serviceId: serviceId });
             const body = { inputs: inputs || [] };
+            const search = typeof key === 'string' ? '?key=' + encodeURIComponent(key) : '';
 
-            return apiFetch('services/' + serviceId + '/previous-job-outputs', { method: 'POST', body: body });
+            return apiFetch('services/' + serviceId + '/previous-job-outputs' + search, { method: 'POST', body: body });
         },
         getJobs: function(query) {
             return apiFetch('jobs', { query: query });
@@ -485,8 +486,8 @@ export function createEndUserSdk(options) {
         getService: function() {
             return apiClient.getService(serviceId);
         },
-        getPreviousJobOutputs: function(inputs) {
-            return apiClient.getPreviousJobOutputs(serviceId, inputs);
+        getPreviousJobOutputs: function(inputs, key) {
+            return apiClient.getPreviousJobOutputs(serviceId, inputs, key);
         },
         getJob: function() {
             return apiClient.getJob(jobId);
