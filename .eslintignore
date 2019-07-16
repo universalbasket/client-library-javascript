@@ -1,3 +1,4 @@
 node_modules
 example/node_modules
 example/web_modules
+index.umd.js

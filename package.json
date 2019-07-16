@@ -19,10 +19,10 @@
   "repository": "github:universalbasket/javascript-sdk",
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^5.16.0",
+    "eslint": "^6.0.1",
     "eslint-config-ub": "^3.0.0",
     "node-fetch": "^2.6.0",
     "rimraf": "^2.6.3",
-    "rollup": "^1.13.1"
+    "rollup": "^1.17.0"
   }
 }
