@@ -3,7 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
-const { createClientSdk } = require('@ubio/sdk');
+const { createClientSdk } = require('@ubio/client-library');
 
 const { SERVICE_ID, CLIENT_TOKEN } = process.env;
 
