@@ -1,5 +1,5 @@
 {
-  "name": "@ubio/sdk",
+  "name": "@ubio/client-library",
   "version": "0.8.0",
   "description": "JavaScript SDK for integrating with ubio.",
   "main": "index.umd.js",
