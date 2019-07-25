@@ -16,7 +16,7 @@
     "index.umd.js"
   ],
   "author": "",
-  "repository": "github:universalbasket/javascript-sdk",
+  "repository": "github:universalbasket/client-library-javascript",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^6.0.1",
