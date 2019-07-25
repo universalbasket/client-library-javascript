@@ -11,14 +11,14 @@
   "license": "ISC",
   "dependencies": {
     "@pika/web": "^0.4.2",
-    "@ubio/sdk": "file:..",
+    "@ubio/client-library": "file:..",
     "body-parser": "^1.18.3",
     "express": "^4.17.1",
     "node-fetch": "^2.6.0"
   },
   "@pika/web": {
     "webDependencies": [
-      "@ubio/sdk"
+      "@ubio/client-library"
     ]
   }
 }

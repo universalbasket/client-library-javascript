@@ -15,13 +15,13 @@ below).
 To install with npm, use:
 
 ```shell
-npm install @ubio/sdk
+npm install @ubio/client-library
 ```
 
 If you're using pika for your client side modules:
 
 ```shell
-npm install @ubio/sdk
+npm install @ubio/client-library
 npx @pika/web
 ```
 
@@ -32,7 +32,7 @@ If you want to quickly try out this module you can use
 import {
     createClientSdk,
     createEndUserSdk
-} from 'https://unpkg.com/@ubio/sdk?module';
+} from 'https://unpkg.com/@ubio/client-library?module';
 
 // ...
 ```
@@ -40,7 +40,7 @@ import {
 You may also use the module as an old fashioned global:
 
 ```html
-<script src="https://unpkg.com/@ubio/sdk"></script>
+<script src="https://unpkg.com/@ubio/client-library"></script>
 <script>
     var endUserSdk = ubioSdk.createEndUserSdk({ /* ... */ });
 </script>
@@ -55,7 +55,7 @@ older browsers, then you must polyfill these. Since Node doesn't include
 `fetch`, you should pass an equivalent function in as an argument:
 
 ```javascript
-const { createClientSdk } = require('@ubio/sdk');
+const { createClientSdk } = require('@ubio/client-library');
 const fetch = require('node-fetch');
 
 const clientSdk = createClientSdk({ fetch, /* ... */ });
@@ -83,7 +83,7 @@ POST it to our API to create it.
 
 ```javascript
 // On your server.
-const { createClientSdk } = require('@ubio/sdk');
+const { createClientSdk } = require('@ubio/client-library');
 const fetch = require('node-fetch');
 const token = process.env.UBIO_CLIENT_TOKEN;
 const serviceId = process.env.UBIO_SERVICE_ID;
@@ -104,7 +104,7 @@ SDK object.
 
 ```javascript
 // In the customer browser.
-import { createEndUserSdk } from '@ubio/sdk';
+import { createEndUserSdk } from '@ubio/client-library';
 
 // Function is called with an object with inputs when the customer decides to
 // make a purchase.
