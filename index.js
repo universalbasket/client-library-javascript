@@ -282,7 +282,7 @@ function makeApiClient(baseUrl, fetch, token) {
                 return;
             }
 
-            callback(jobEvent.name);
+            callback(jobEvent.name, jobEvent);
 
             if (jobEvent.name === 'success' || jobEvent.name === 'fail') {
                 close();
@@ -359,7 +359,7 @@ function makeApiClient(baseUrl, fetch, token) {
                     });
 
                     events.forEach(function(event) {
-                        callback(event.name);
+                        callback(event.name, event);
 
                         if (event.name === 'success' || event.name === 'fail') {
                             stop();
