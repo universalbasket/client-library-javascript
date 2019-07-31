@@ -282,7 +282,7 @@ function makeApiClient(baseUrl, fetch, token) {
                 return;
             }
 
-            callback(jobEvent.name);
+            callback(jobEvent.name, jobEvent);
 
             if (jobEvent.name === 'success' || jobEvent.name === 'fail') {
                 close();
@@ -311,39 +311,41 @@ function makeApiClient(baseUrl, fetch, token) {
         function run() {
             return delay(dt)
                 .then(function() {
-                    if (!stopped) {
-                        return api.getJobEvents(jobId, offset)
-                            .then(function(body) {
-                                backoff = 0;
-                                return body;
-                            })
-                            .catch(function(error) {
-                                const message = error.stack || error.message;
-
-                                // 4xy errors don't lead to a retry, since the
-                                // client must change something before the
-                                // request can work.
-                                if (error.status < 500) {
-                                    callback('error', error);
-                                    stop();
-                                    return;
-                                }
-
-                                // 5xy errors lead to retries with backoff.
-                                callback('error', error);
-
-                                backoff += 1;
-
-                                const backoffTime = ((dt + backoff * dt) / 1000).toFixed(1);
-
-                                console.warn('Error contacting API. Retrying in ' + backoffTime + ' s. ', message);
-
-                                return delay(backoff * dt)
-                                    .then(function() {
-                                        return { data: [] };
-                                    });
-                            });
+                    if (stopped) {
+                        return;
                     }
+
+                    return api.getJobEvents(jobId, offset)
+                        .then(function(body) {
+                            backoff = 0;
+                            return body;
+                        })
+                        .catch(function(error) {
+                            const message = error.stack || error.message;
+
+                            // 4xy errors don't lead to a retry, since the
+                            // client must change something before the
+                            // request can work.
+                            if (error.status < 500) {
+                                callback('error', error);
+                                stop();
+                                return;
+                            }
+
+                            // 5xy errors lead to retries with backoff.
+                            callback('error', error);
+
+                            backoff += 1;
+
+                            const backoffTime = ((dt + backoff * dt) / 1000).toFixed(1);
+
+                            console.warn('Error contacting API. Retrying in ' + backoffTime + ' s. ', message);
+
+                            return delay(backoff * dt)
+                                .then(function() {
+                                    return { data: [] };
+                                });
+                        });
                 })
                 .then(function(body) {
                     if (stopped) {
@@ -359,7 +361,7 @@ function makeApiClient(baseUrl, fetch, token) {
                     });
 
                     events.forEach(function(event) {
-                        callback(event.name);
+                        callback(event.name, event);
 
                         if (event.name === 'success' || event.name === 'fail') {
                             stop();

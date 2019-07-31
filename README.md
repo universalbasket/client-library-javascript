@@ -130,12 +130,12 @@ async function onSubmit(input) {
 
     // Track the job. When an event occurs the callback will be called. Errors
     // lead to the callback being called with the "error" event name and an
-    // error instance.
+    // error object as its data argument.
     //
     // When the job reaches a state of "success" or "fail" tracking
     // will stop and this function will resolve. The call to trackJob returns
     // a function which, when called, will manually stop tracking.
-    const close = endUserSdk.trackJob(job.id, async (eventName, error) => {
+    const close = endUserSdk.trackJob(job.id, async (eventName, data) => {
         if (eventName === 'awaitingInput') {
             // ask user for input
             const data = await getInputFromUser();
@@ -299,7 +299,8 @@ Gets the active 3D Secure session for the given job.
 
 Track a job. Returns a function which may be called to stop tracking.
 
-The callback will be called with the event name. Job event names are:
+The callback will be called with the event name and a payload. Job event names
+are:
 
  - `"restart"`
  - `"success"`
@@ -315,12 +316,14 @@ Two special events may also be emitted:
  - `"close"`
 
 When called with the `"error"` event name, the second parameter will be an error
-object. In the future other events may also come with data like this.
+object. Other events have a second parameter which is a payload. In particular
+the `awaitingInput` and `createOutput` events have payloads containing `key` and
+`stage` fields.
 
 The `"close"` event is always the last event and happens only once. It occurs
 after certain errors (particularly 4xy request errors), after `"success"` or
 `"fail"` events, or after the function returned by the call to `trackJob` is
-called. It will only be emitted once.
+called. It will only be emitted once, and will include no payload.
 
 #### `createOtp()`
 
@@ -416,7 +419,7 @@ Gets the data for a given file as a [blob][blob].
 
 Gets the active 3D Secure session for the job.
 
-#### `trackJob()`
+#### `trackJob(callback)`
 
 Tracks the events of the job which this `sdk` is associated with. See the
 same-named method of the client sdk for more information.
