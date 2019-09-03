@@ -148,7 +148,7 @@ function makeApiClient(baseUrl, fetch, token) {
         },
         createJobInput: function(jobId, key, data, stage) {
             assertStringArguments({ jobId: jobId, key: key });
-            return apiFetch('jobs/' + jobId + '/inputs', { method: 'POST', body: { key, stage, data } });
+            return apiFetch('jobs/' + jobId + '/inputs', { method: 'POST', body: { key: key, stage: stage, data: data } });
         },
         getJobOutputs: function(jobId) {
             assertStringArguments({ jobId: jobId });
@@ -203,7 +203,7 @@ function makeApiClient(baseUrl, fetch, token) {
         },
         getJobFiles: function(jobId) {
             assertStringArguments({ jobId: jobId });
-            return apiFetch('jobs/', + jobId + '/files');
+            return apiFetch('jobs/' + jobId + '/files');
         },
         getJobFile: function(jobId, fileId) {
             assertStringArguments({ jobId: jobId, fileId: fileId });
@@ -264,7 +264,7 @@ function makeApiClient(baseUrl, fetch, token) {
             }
         }
 
-        sse.onmessage(function(event) {
+        sse.onmessage = function(event) {
             if (closed) {
                 return;
             }
@@ -287,11 +287,11 @@ function makeApiClient(baseUrl, fetch, token) {
             if (jobEvent.name === 'success' || jobEvent.name === 'fail') {
                 close();
             }
-        });
+        };
 
-        sse.onerror(function(error) {
+        sse.onerror = function(error) {
             callback('error', error);
-        });
+        };
 
         return close;
     }
