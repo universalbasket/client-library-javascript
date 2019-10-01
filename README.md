@@ -227,7 +227,6 @@ Create a job with the following fields:
 | callbackUrl | false | A callback URL to make a request to when particular events occur. | none |
 | input | false | A prepopulated set of inputs. | `{}` |
 | category | false | `"live"` or `"test"` | `"live"` |
-| scriptVersion | false | A specific version of the script to use. | Defaults to the published version. |
 
 #### `getJob(jobId)`
 
