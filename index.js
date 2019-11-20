@@ -88,6 +88,7 @@ function fetchWrapper(url, fetch, token, opts) {
                         // TODO: Better errors from error bodies.
                         const error = new Error(body.message || 'Unexpected response');
                         error.status = response.status;
+                        error.details = body;
                         throw error;
                     });
             }
