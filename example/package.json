@@ -4,19 +4,19 @@
   "description": "JavaScript SDK example for integrating with ubio.",
   "main": "index.js",
   "scripts": {
-    "install": "pika-web"
+    "install": "snowpack"
   },
   "author": "",
   "repository": "github:universalbasket/javascript-sdk",
   "license": "ISC",
   "dependencies": {
-    "@pika/web": "^0.4.2",
     "@ubio/client-library": "file:..",
     "body-parser": "^1.18.3",
     "express": "^4.17.1",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "snowpack": "^1.6.0"
   },
-  "@pika/web": {
+  "snowpack": {
     "webDependencies": [
       "@ubio/client-library"
     ]
