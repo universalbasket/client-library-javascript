@@ -1,4 +1,4 @@
-import { createEndUserSdk } from '/modules/@ubio/sdk.js';
+import { createEndUserSdk } from '/modules/@ubio/client-library.js';
 
 // The server is a client of the ubio REST API. It creates a job using data the
 // browser sends.

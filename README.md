@@ -18,11 +18,11 @@ To install with npm, use:
 npm install @ubio/client-library
 ```
 
-If you're using pika for your client side modules:
+If you're using [snowpack](https://www.snowpack.dev/) for your client side modules:
 
 ```shell
 npm install @ubio/client-library
-npx @pika/web
+npx snowpack
 ```
 
 If you want to quickly try out this module you can use
