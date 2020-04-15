@@ -316,8 +316,7 @@ Two special events may also be emitted:
 
 When called with the `"error"` event name, the second parameter will be an error
 object. Other events have a second parameter which is a payload. In particular
-the `awaitingInput` and `createOutput` events have payloads containing `key` and
-`stage` fields.
+the `awaitingInput` and `createOutput` events have payloads containing `key` field.
 
 The `"close"` event is always the last event and happens only once. It occurs
 after certain errors (particularly 4xy request errors), after `"success"` or

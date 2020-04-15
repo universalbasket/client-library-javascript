@@ -101,10 +101,10 @@ function fetchWrapper(url, fetch, token, opts) {
 }
 
 function makeApiClient(baseUrl, fetch, token) {
-    var canonicalizedBaseiUrl = baseUrl.slice(-1) === '/' ? baseUrl : (baseUrl + '/');
+    var canonicalizedBaseUrl = baseUrl.slice(-1) === '/' ? baseUrl : (baseUrl + '/');
 
     function apiFetch(path, options) {
-        return fetchWrapper(canonicalizedBaseiUrl + path, fetch, token, options);
+        return fetchWrapper(canonicalizedBaseUrl + path, fetch, token, options);
     }
 
     var api = {
@@ -146,22 +146,18 @@ function makeApiClient(baseUrl, fetch, token) {
 
             return apiFetch('jobs/' + jobId + '/reset', { method: 'POST', body: body });
         },
-        createJobInput: function(jobId, key, data, stage) {
+        createJobInput: function(jobId, key, data) {
             assertStringArguments({ jobId: jobId, key: key });
-            return apiFetch('jobs/' + jobId + '/inputs', { method: 'POST', body: { key: key, stage: stage, data: data } });
+            return apiFetch('jobs/' + jobId + '/inputs', { method: 'POST', body: { key: key, data: data } });
         },
         getJobOutputs: function(jobId) {
             assertStringArguments({ jobId: jobId });
             return apiFetch('jobs/' + jobId + '/outputs');
         },
-        getJobOutput: function(jobId, key, stage) {
+        getJobOutput: function(jobId, key) {
             assertStringArguments({ jobId: jobId, key: key });
 
             var path = 'jobs/' + jobId + '/outputs/' + key;
-
-            if (stage) {
-                path += '/' + stage;
-            }
 
             return apiFetch(path);
         },
@@ -210,7 +206,7 @@ function makeApiClient(baseUrl, fetch, token) {
 
             var isUrl = fileId.indexOf('http') === 0;
 
-            if (isUrl && fileId.indexOf(canonicalizedBaseiUrl) !== 0) {
+            if (isUrl && fileId.indexOf(canonicalizedBaseUrl) !== 0) {
                 return fetch(fileId)
                     .then(function(res) {
                         if (!res.ok) {
@@ -221,7 +217,7 @@ function makeApiClient(baseUrl, fetch, token) {
                     });
             }
 
-            var url = isUrl ? fileId.slice(canonicalizedBaseiUrl.length) : 'jobs/' + jobId + '/files/' + fileId;
+            var url = isUrl ? fileId.slice(canonicalizedBaseUrl.length) : 'jobs/' + jobId + '/files/' + fileId;
 
             return apiFetch(url, { parse: false })
                 .then(function(res) {
@@ -430,6 +426,7 @@ function makeVaultClient(baseUrl, fetch, token) {
  * @param {Object} options
  * @param {string} options.token
  * @param {string} options.apiUrl
+ * @param {string} options.vaultUrl
  * @param {function} options.fetch
  */
 export function createClientSdk(options) {
@@ -500,14 +497,14 @@ export function createEndUserSdk(options) {
         resetJob: function(fromInputKey, preserveInputs) {
             return apiClient.resetJob(jobId, fromInputKey, preserveInputs);
         },
-        createJobInput: function(key, data, stage) {
-            return apiClient.createJobInput(jobId, key, data, stage);
+        createJobInput: function(key, data) {
+            return apiClient.createJobInput(jobId, key, data);
         },
         getJobOutputs: function() {
             return apiClient.getJobOutputs(jobId);
         },
-        getJobOutput: function(key, stage) {
-            return apiClient.getJobOutput(jobId, key, stage);
+        getJobOutput: function(key) {
+            return apiClient.getJobOutput(jobId, key);
         },
         getJobScreenshots: function() {
             return apiClient.getJobScreenshots(jobId);
