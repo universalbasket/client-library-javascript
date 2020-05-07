@@ -80,6 +80,19 @@ function fetchWrapper(url, fetch, token, opts) {
         keepalive: false
     };
 
+    // Edge 12 - Edge 18 only supports an early draft of the specification.
+    // fetch() fails with 'Invalid argument' error when referrerPolicy: 'origin' option provided.
+    if (typeof window !== 'undefined') {
+        var ua = window && window.navigator && window.navigator.userAgent || '';
+        var edge = ua.indexOf('Edge/');
+        if (edge > 0) {
+            var edgeVer = parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+            if (edgeVer <= 18) {
+                fetchOptions.referrerPolicy = '';
+            }
+        }
+    }
+
     return fetch(url + search, fetchOptions)
         .then(function(response) {
             if (!response.ok) {
