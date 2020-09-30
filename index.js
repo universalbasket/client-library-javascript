@@ -248,7 +248,7 @@ function makeApiClient(baseUrl, fetch, token) {
                 return track(jobId, callback);
             }
 
-            return poll(jobId, callback, 1000);
+            return poll(jobId, callback, 200);
         }
     };
 
